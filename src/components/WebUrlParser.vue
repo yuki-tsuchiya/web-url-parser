@@ -170,6 +170,10 @@
         margin: 4px;
     }
 
+    h3 {
+        font-weight: 700;
+    }
+
     strong {
         margin-right: 10px;
     }
