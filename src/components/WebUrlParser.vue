@@ -149,7 +149,6 @@
             },
             copyText: function (text, targetId) {
                 if (!navigator.clipboard || !navigator.clipboard.writeText) {
-                    alert('cannot user writetext');
                     let range = document.createRange();
                     const yourCode = document.getElementById(targetId);
                     range.selectNode(yourCode);
