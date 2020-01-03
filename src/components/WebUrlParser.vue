@@ -16,10 +16,11 @@
         <div class="row">
             <div class="output-container text-left paragraph">
                 <strong class="title">Protocol:</strong>
-                <span>{{protocol}}</span>
+                <span v-bind:id="'protocol-val'">{{protocol}}</span>
             </div>
             <div class="d-flex align-items-center btn-container float-right">
-                <b-button id="tooltip-target-0" class="btn btn-sm btn-secondary" @click="copyText(protocol)">Copy
+                <b-button id="tooltip-target-0" class="btn btn-sm btn-secondary"
+                          @click="copyText(protocol, 'protocol-val')">Copy
                 </b-button>
                 <b-tooltip target="tooltip-target-0" triggers="focus">
                     copy to clipboard
@@ -30,10 +31,11 @@
         <div class="row">
             <div class="text-left paragraph output-container">
                 <strong class="title">Domain:</strong>
-                <span>{{domain}}</span>
+                <span v-bind:id="'domain-val'">{{domain}}</span>
             </div>
             <div class="d-flex align-items-center btn-container">
-                <b-button id="tooltip-target-1" class="btn btn-sm btn-secondary" @click="copyText(domain)">Copy
+                <b-button id="tooltip-target-1" class="btn btn-sm btn-secondary" @click="copyText(domain,'domain-val')">
+                    Copy
                 </b-button>
                 <b-tooltip target="tooltip-target-1" triggers="focus">
                     copy to clipboard
@@ -44,10 +46,12 @@
         <div class="row">
             <div class="text-left paragraph output-container">
                 <strong class="title">Path:</strong>
-                <span>{{path}}</span>
+                <span v-bind:id="'path-val'">{{path}}</span>
             </div>
             <div class="d-flex align-items-center btn-container">
-                <b-button id="tooltip-target-2" class="btn btn-sm btn-secondary" @click="copyText(path)">Copy</b-button>
+                <b-button id="tooltip-target-2" class="btn btn-sm btn-secondary" @click="copyText(path, 'path-val')">
+                    Copy
+                </b-button>
                 <b-tooltip target="tooltip-target-2" triggers="focus">
                     copy to clipboard
                 </b-tooltip>
@@ -62,11 +66,11 @@
         <div class="row output-q-string" v-for="(param, key) in params" :key="key">
             <div class="text-left q-string output-container">
                 <span class="q-title"><span class="q-title-text">{{param.key}}</span>:</span>
-                <span>{{param.val}}</span>
+                <span v-bind:id="'q-string-val-'+key">{{param.val}}</span>
             </div>
             <div class="d-flex align-items-center btn-container">
                 <b-button v-bind:id="'q-string-tooltip-target-'+key" class="btn btn-sm btn-info"
-                          @click="copyText(param.val)">Copy
+                          @click="copyText(param.val, 'q-string-val-'+key)">Copy
                 </b-button>
                 <b-tooltip v-bind:target="'q-string-tooltip-target-'+key" triggers="focus">
                     copy to clipboard
@@ -143,12 +147,21 @@
                     return [];
                 }
             },
-            copyText: function (text) {
-                navigator.clipboard
-                    .writeText(text);
-                setTimeout(() => {
-                    document.activeElement.blur();
-                }, 500);
+            copyText: function (text, targetId) {
+                if (!navigator.clipboard || !navigator.clipboard.writeText) {
+                    alert('cannot user writetext');
+                    let range = document.createRange();
+                    const yourCode = document.getElementById(targetId);
+                    range.selectNode(yourCode);
+                    window.getSelection().addRange(range);
+                    document.execCommand('copy');
+                } else {
+                    navigator.clipboard
+                        .writeText(text);
+                    setTimeout(() => {
+                        document.activeElement.blur();
+                    }, 500);
+                }
             }
         }
     }
