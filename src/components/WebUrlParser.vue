@@ -1,5 +1,5 @@
 <template>
-    <div class="container">
+    <div class="container card">
         <div class="row">
             <div class="col-12">
                 <div class="form-group url-group">
@@ -14,12 +14,27 @@
             <div class="col-12 text-left warning" v-if="!isValidUrl">Invalid URL</div>
         </div>
         <div class="row">
-            <div class="col-11 text-left paragraph">
+            <div class="output-container text-left paragraph">
+                <strong class="title">Protocol:</strong>
+                <span>{{protocol}}</span>
+            </div>
+            <div class="d-flex align-items-center btn-container float-right">
+                <b-button id="tooltip-target-0" class="btn btn-sm btn-secondary" @click="copyText(protocol)">Copy
+                </b-button>
+                <b-tooltip target="tooltip-target-0" triggers="focus">
+                    copy to clipboard
+                </b-tooltip>
+            </div>
+        </div>
+        <hr/>
+        <div class="row">
+            <div class="text-left paragraph output-container">
                 <strong class="title">Domain:</strong>
                 <span>{{domain}}</span>
             </div>
-            <div class="col-1 d-flex align-items-center">
-                <b-button id="tooltip-target-1" class="btn btn-sm btn-success" @click="copyText(domain)">Copy</b-button>
+            <div class="d-flex align-items-center btn-container">
+                <b-button id="tooltip-target-1" class="btn btn-sm btn-secondary" @click="copyText(domain)">Copy
+                </b-button>
                 <b-tooltip target="tooltip-target-1" triggers="focus">
                     copy to clipboard
                 </b-tooltip>
@@ -27,12 +42,12 @@
         </div>
         <hr/>
         <div class="row">
-            <div class="col-11 text-left paragraph">
+            <div class="text-left paragraph output-container">
                 <strong class="title">Path:</strong>
                 <span>{{path}}</span>
             </div>
-            <div class="col-1 d-flex align-items-center">
-                <b-button id="tooltip-target-2" class="btn btn-sm btn-success" @click="copyText(path)">Copy</b-button>
+            <div class="d-flex align-items-center btn-container">
+                <b-button id="tooltip-target-2" class="btn btn-sm btn-secondary" @click="copyText(path)">Copy</b-button>
                 <b-tooltip target="tooltip-target-2" triggers="focus">
                     copy to clipboard
                 </b-tooltip>
@@ -40,17 +55,17 @@
         </div>
         <hr/>
         <div class="row">
-            <div class="col-12 text-left paragraph">
+            <div class="text-left paragraph output-container">
                 <strong class="title">Query String Parameters:</strong>
             </div>
         </div>
-        <div class="row" v-for="(param, key) in params" :key="key">
-            <div class="col-11 text-left q-string">
-                <strong class="q-title">{{param.key}}:</strong>
+        <div class="row output-q-string" v-for="(param, key) in params" :key="key">
+            <div class="text-left q-string output-container">
+                <span class="q-title"><span class="q-title-text">{{param.key}}</span>:</span>
                 <span>{{param.val}}</span>
             </div>
-            <div class="col-1 d-flex align-items-center">
-                <b-button v-bind:id="'q-string-tooltip-target-'+key" class="btn btn-sm btn-success"
+            <div class="d-flex align-items-center btn-container">
+                <b-button v-bind:id="'q-string-tooltip-target-'+key" class="btn btn-sm btn-info"
                           @click="copyText(param.val)">Copy
                 </b-button>
                 <b-tooltip v-bind:target="'q-string-tooltip-target-'+key" triggers="focus">
@@ -73,6 +88,7 @@
         data: function () {
             return {
                 url: '',
+                protocol: '',
                 domain: '',
                 path: '',
                 params: [],
@@ -80,7 +96,6 @@
             }
         },
         watch: {
-            // この関数は question が変わるごとに実行されます。
             url: function (after) {
                 if (after === '') {
                     this.params = [];
@@ -91,16 +106,15 @@
                 }
                 try {
                     const newUrl = new URL(after);
-
                     const queryString = newUrl.search;
-
                     this.params = this.getParams(queryString);
-
+                    this.protocol = newUrl.protocol;
                     this.domain = newUrl.host;
-                    this.path = newUrl.pathname;
+                    this.path = decodeURI(newUrl.pathname);
                     this.isValidUrl = true;
                 } catch (e) {
                     this.params = [];
+                    this.protocol = '';
                     this.domain = '';
                     this.path = '';
                     this.isValidUrl = false;
@@ -116,11 +130,11 @@
                         const item = part.split('=');
                         const result = {};
                         if (item.length === 1) {
-                            result['key'] = item[0];
+                            result['key'] = decodeURI(item[0]);
                             result['val'] = '';
                         } else {
-                            result['key'] = item[0];
-                            result['val'] = decodeURIComponent(item[1]);
+                            result['key'] = decodeURI(item[0]);
+                            result['val'] = decodeURI(item[1]);
                         }
                         results.push(result);
                     });
@@ -142,7 +156,7 @@
 
 <style scoped>
     #url-input {
-        min-height: 200px;
+        min-height: 160px;
         padding-bottom: 0;
     }
 
@@ -156,6 +170,11 @@
 
     .q-title {
         margin-left: 6px;
+        margin-right: 6px;
+    }
+
+    .q-title-text {
+        color: #c62929;
     }
 
     .paragraph {
@@ -172,6 +191,8 @@
 
     h3 {
         font-weight: 700;
+        margin-top: 10px;
+        margin-bottom: 10px;
     }
 
     strong {
@@ -179,7 +200,7 @@
     }
 
     .title {
-        color: #000;
+        /*color: #c62cba;*/
     }
 
     .warning {
@@ -199,5 +220,23 @@
 
     textarea {
         word-break: break-all;
+    }
+
+    .container {
+        min-height: 95vh;
+    }
+
+    .btn-container {
+        width: 60px;
+    }
+
+    .output-container {
+        width: calc(100% - 60px);
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    .output-q-string {
+        font-size: 14px;
     }
 </style>
