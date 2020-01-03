@@ -14,4 +14,5 @@ phases:
       - npm run build
   post_build:
     commands:
-      - aws s3 sync dist s3://looaf-urlparser --delete
+      - aws s3 sync dist ${S3_BUCKET} --delete
+      - aws cloudfront create-invalidation --distribution-id 　${CLOUDFRONT_DISTRIBUTION_ID} --paths '/*'
